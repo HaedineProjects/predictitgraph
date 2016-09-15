@@ -1,0 +1,58 @@
+<html>
+	<head>
+		<link rel="stylesheet/less" type="text/css" href="/styles/styles.less" />
+		<script type="text/javascript">less = { env: 'development' };</script>
+		<script src="/js/less.js" type="text/javascript"></script>
+		<script src="/js/jquery-1.10.0.js" type="text/javascript"></script>
+		<script src="/js/d3.min.js" type="text/javascript"></script>
+	</head>
+    <body>
+	    <div class="inputElement topTube">Top Tube: <input type="text" value="975"></div>
+	    <div class="inputElement wheelBase">Wheel Base: <input type="text" value="975"></div>
+	    <div class="inputElement bbHeight">Bottom Bracket Height: <input type="text" value="975"></div>
+	    <div class="inputElement chainStayLength">Chain Stay Length: <input type="text" value="975"></div>
+	    <div class="right">
+			<h2>also whatever</h2>
+			<svg width="1000" height="500"></svg>
+	    </div>
+	    <div class="clrfix"></div>
+    	<div class="left">
+	        <h1>whatever</h1>
+	        <img src="/images/cannondaleGeometryChart.gif" />
+	    </div>
+
+    </body>
+    <script>
+
+    	function clearCircles() {
+    		var svg = d3.select("svg");
+    		svg.selectAll("circle").remove();
+    	}
+
+    	function update() {
+    		clearCircles();
+    		var scalar = 3;
+    		var originX = 300;
+    		var originY = 350;
+
+    		var wheelRadius = 350; //mm
+    		// var wheelBase = 975; //mm
+    		var wheelBase = d3.select(".inputElement.wheelBase").select("input").property("value");
+
+    		var svg = d3.select("svg");
+    		var circle = svg.selectAll("circle").data([0, wheelBase/scalar]);
+
+    		circle.enter().append("circle")
+    			.attr("cy", originY)
+    			.attr("cx", function(d, i) { return originX + d; })
+    			.attr("r", wheelRadius/scalar);
+
+    		// console.log($(".inputElement.wheelBase input").value)
+
+
+    	}
+    	update();
+    	d3.select(".inputElement.wheelBase").on("change", update);
+
+    </script>
+</html>
