@@ -28,7 +28,7 @@ for state in state_urls:
 	contracts = response_data['Contracts']
 	for c in contracts:
 		state_prices[state][c['Name']] = c['LastTradePrice']
-	time.sleep(5)
+	time.sleep(1)
 
 
 print state_prices
