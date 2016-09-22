@@ -193,15 +193,10 @@ Current threshhold: <span id="slidertext">60</span>
                     .attr("width", 140)
                     .attr("height", 200)
                     .selectAll("g")
-                    .data(partyEV)
+                    .data(d3.keys(partyEV))
                     .enter()
-                    .append("g");
-                    // .attr("transform", function(d, i) { return "translate(0," + i * 20 + ")"; });
-
-                    legend.append("rect")
-                          .attr("width", 18)
-                          .attr("height", 18)
-                          .style("fill", "#444");
+                    .append("g")
+                    .attr("transform", function(d, i) { return "translate(0," + i * 20 + ")"; });
 
                     legend.append("text")
                         .data(legendText)
@@ -216,7 +211,7 @@ Current threshhold: <span id="slidertext">60</span>
         });
     }
 
-    drawMap(.6);
+    drawMap(.8);
     d3.select('#slider')
         .attr("width", w)
         .call(d3.slider()
