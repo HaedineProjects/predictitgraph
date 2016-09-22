@@ -7,6 +7,7 @@ state_urls = {
 	'CO' : 'https://www.predictit.org/api/marketdata/ticker/CO.USPREZ16',
 	'CT' : 'https://www.predictit.org/api/marketdata/ticker/CT.USPREZ16',
 	'DE' : 'https://www.predictit.org/api/marketdata/ticker/DE.USPREZ16',
+	'DC' : 'https://www.predictit.org/api/marketdata/ticker/DC.USPREZ16',
 	'FL' : 'https://www.predictit.org/api/marketdata/ticker/FL.USPREZ16',
 	'GA' : 'https://www.predictit.org/api/marketdata/ticker/GA.USPREZ16',
 	'HI' : 'https://www.predictit.org/api/marketdata/ticker/HI.USPREZ16',

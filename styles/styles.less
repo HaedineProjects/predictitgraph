@@ -1,11 +1,24 @@
-div.tooltip {   
+.clrfix {
+  zoom: 1;
+}
+
+.clrfix:after {
+  content: ".";
+  display: block;
+  height: 0;
+  width: 0;
+  line-height: 0;
+  font-size: 0;
+  clear: both;
+  visibility: hidden;
+}
+
+div.tooltip {
   position: absolute;           
   text-align: center;           
-  width: 60px;                  
-  height: 28px;                 
-  padding: 2px;             
+  padding: 4px;             
   font: 12px sans-serif;        
-  background: lightsteelblue;   
+  background: lightsteelblue;
   border: 0px;      
   border-radius: 8px;           
   pointer-events: none;         

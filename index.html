@@ -1,127 +1,204 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="utf-8">
-        <title>Map of US States colored by Prediction markets probabilities for the election</title>
-        <script src="/js/d3.min.js" type="text/javascript"></script>
-        <style type="text/css">
-            /* No style rules here yet */
-            div.tooltip {   
-              position: absolute;           
-              text-align: center;           
-              /*width: 60px;                  */
-              /*height: 28px;                 */
-              padding: 4px;             
-              font: 12px sans-serif;        
-              background: lightsteelblue;
-              border: 0px;      
-              border-radius: 8px;           
-              pointer-events: none;         
-            }
-        </style>
-    </head>
-    <body>
-        <script type="text/javascript">
+<head>
+    <meta charset="utf-8">
+    <title>Map of US States colored by Prediction markets probabilities for the election</title>
+    <script src="/js/d3.min.js" type="text/javascript"></script>
+    <script src="/js/d3.slider.js" type="text/javascript"></script>
+    <link rel="stylesheet" href="/styles/d3.slider.css" />  
+    <link rel="stylesheet/less" type="text/css" href="/styles/styles.less" />
+    <script src="/js/less.js" type="text/javascript"></script>
+</head>
+<body>
 
-            //Width and height
-            var w = 1200;
-            var h = 700;
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1"></svg>
+<div class="clrfix"></div>
+Current threshhold: <span id="slidertext">60</span>
+<div class="clrfix"></div>
+<div id="slider"></div>
 
-            //Define map projection
-            var projection = d3.geo.albersUsa()
-                                   .translate([w/2, h/2]);
-                                   // .scale([500]);
+<script type="text/javascript">
 
-            //Define path generator
-            var path = d3.geo.path()
-                             .projection(projection);
-                             
-            //Define quantize scale to sort data values into buckets of color
-            var scale = d3.scale.linear()
-                        // .domain([-1, 0, 1])
-                        // .domain([-1, 0, 1])
-                        .domain([0, 0.5, 1])
-                        .range(["#3366FF","#f0f0f0","#ff0000"])
-            //Create SVG element
-            var svg = d3.select("body")
-                        .append("svg")
-                        .attr("width", w)
-                        .attr("height", h);
+    //Width and height
+    var w = 1200;
+    var h = 700;
 
-            var div = d3.select("body").append("div")
-                .attr("class", "tooltip")
-                .style("opacity", 0);
+    //Define map projection
+    var projection = d3.geo.albersUsa()
+                           .translate([w/2, h/2]);
 
-            //Load in agriculture data
-            d3.json("state_data.json", function(data) {
-                //Load in GeoJSON data
-                d3.json("us-states.json", function(json) {
-                    //Merge the ag. data and GeoJSON
-                    //Loop through once for each ag. data value
-                    for (var state in data) {
-                        //Grab state name
-                        var dataState = state;
-                        //Grab data value, and convert from string to float
-                        var dataValue = parseFloat(data[state].probability);
-                        var electoralVotes = parseFloat(data[state].electoralVotes);
-                        var republican = parseFloat(data[state].republican);
-                        var democratic = parseFloat(data[state].democratic);
-                        //Find the corresponding state inside the GeoJSON
-                        for (var j = 0; j < json.features.length; j++) {
-                            var jsonState = json.features[j].properties.name;
-                            if (dataState == jsonState) {
-                                //Copy the data value into the JSON
-                                json.features[j].properties.value = dataValue;
-                                json.features[j].properties.electoralVotes = electoralVotes;
-                                json.features[j].properties.republican = republican;
-                                json.features[j].properties.democratic = democratic;
-                                //Stop looking through the JSON
-                                break;
-                            }
-                        }
+    //Define path generator
+    var path = d3.geo.path().projection(projection);
+                     
+    //Define quantize scale to sort data values into buckets of color
+    var scale = d3.scale.linear()
+                .domain([0, 0.5, 1])
+                .range(["#3366FF","#f0f0f0","#ff0000"])
+    //Create SVG element
+    var svg = d3.select("svg")
+                .attr("width", w)
+                .attr("height", h);
+
+    var div = d3.select("body").append("div")
+        .attr("class", "tooltip")
+        .style("opacity", 0);
+
+    function drawMap(threshholdValue) {
+
+        //Load in agriculture data
+        var evGOP = 0;
+        var evDEM = 0;
+        var contested = 0;
+        var threshhold = threshholdValue;
+
+        d3.json("state_data.json", function(data) {
+            //Load in GeoJSON data
+            d3.json("us-states.json", function(json) {
+                //Merge the ag. data and GeoJSON
+                //Loop through once for each ag. data value
+                for (var state in data) {
+                    //Grab state name
+                    var dataState = state;
+                    //Grab data value, and convert from string to float
+                    var dataValue = parseFloat(data[state].probability);
+                    var electoralVotes = parseFloat(data[state].electoralVotes);                    
+                    var republican = parseFloat(data[state].republican);
+                    var democratic = parseFloat(data[state].democratic);
+                    var stateContested = false;
+                    var stateParty = null;
+
+                    if (republican > democratic && republican > threshhold)  {
+                    // if (republican > democratic && republican > threshhold)  {
+                        evGOP += electoralVotes;
+                        stateParty = 'GOP';
+                    } else if (democratic > republican && democratic > threshhold) {
+                    // } else if (democratic > republican && democratic > threshhold) {
+                        evDEM += electoralVotes;
+                        stateParty = 'DEM';
+                    } else {
+                        contested += electoralVotes;
+                        stateContested = true;
+                        stateParty = 'CON';
                     }
 
-                    //Bind data and create one path per GeoJSON feature
-                    svg.selectAll("path")
-                       .data(json.features)
-                       .enter()
-                       .append("path")
-                       .attr("d", path)
-                       .style("stroke", "#fff")
-                       .style("stroke-width", "1")
-                       // .style("border", "5px white")
-                       .style("fill", function(d) {
-                            //Get data value
+                    //Find the corresponding state inside the GeoJSON
+                    for (var j = 0; j < json.features.length; j++) {
+                        var jsonState = json.features[j].properties.name;
+                        if (dataState == jsonState) {
+                            //Copy the data value into the JSON
+                            json.features[j].properties.value = dataValue;
+                            json.features[j].properties.electoralVotes = electoralVotes;
+                            json.features[j].properties.republican = republican;
+                            json.features[j].properties.democratic = democratic;
+                            json.features[j].properties.stateParty = stateParty;
+                            if (stateContested) {
+                                json.features[j].properties.stateContested = true;
+                                json.features[j].properties.outlineColor = "#000"
+                            } else {
+                                json.features[j].properties.stateContested = false;
+                                json.features[j].properties.outlineColor = "#fff"
+                            }
+                            //Stop looking through the JSON
+                            break;
+                        }
+                    }
+                }
+
+                var expectedDEM = json.features.filter(function(key) {
+                    return (key.properties.democratic > key.properties.republican && 
+                        key.properties.democratic > threshhold)
+                });
+                var expectedGOP = json.features.filter(function(key) {
+                    return (key.properties.republican > key.properties.democratic && 
+                        key.properties.republican > threshhold)
+                });
+                var expectedContested = json.features.filter(function(key) {
+                    return (key.properties.republican > key.properties.democratic && 
+                        key.properties.republican < threshhold || 
+                        key.properties.democratic > key.properties.republican && 
+                        key.properties.democratic < threshhold)
+                });
+
+                var partyEV = {}
+
+                partyEV['GOP'] = d3.sum(expectedGOP, function(d) {
+                    return d.properties.electoralVotes
+                })
+
+                partyEV['DEM'] = d3.sum(expectedDEM, function(d) {
+                    return d.properties.electoralVotes
+                })
+
+                partyEV['Contested'] = d3.sum(expectedContested, function(d) {
+                    return d.properties.electoralVotes
+                })
+
+                console.log(partyEV)
+
+                //Bind data and create one path per GeoJSON feature
+                svg.selectAll("path")
+                   .data(json.features)
+                   .enter()
+                   .append("path")
+                   .attr("d", path)
+                   .style("stroke", function(d) {
+                        return d.properties.outlineColor;
+                   })
+                   .style("stroke-width", "1")
+                   // .style("border", "5px white")
+                   .style("fill", function(d) {
+                        //Get data value
+                        if (d.properties.stateContested) {
+                            // return "url(#diagonal-stripe-1)"
+
+                            var pattern = svg.append("pattern")
+                                    .attr({ id:"hash" + d.properties.name.replace(" ",""), width:"8", height:"8", patternUnits:"userSpaceOnUse", patternTransform:"rotate(45)"})
+                                .append("rect")
+                                    .attr({ width:"4", height:"8", transform:"translate(0,0)", fill:scale(d.properties.value) });
+                            return "url(#hash" + d.properties.name.replace(" ","") + ")"
+
+                        } else {
                             var value = d.properties.value;
                             
                             if (value) {
-                                //If value exists…
                                 return scale(value);
                             } else {
-                                //If value is undefined…
                                 return "#ccc";
                             }
-                       })
-                       .on("mouseover", function(d) {
-                            div.transition()
-                            .duration(200)
-                            .style("opacity", .9);
-                            var htmlValue = ''
-                            htmlValue += d.properties.name + ' : <br />'
-                            htmlValue += 'GOP: ' + Math.round(100 * d.properties.republican) + '%<br />'
-                            htmlValue += 'DEM: ' + Math.round(100 * d.properties.democratic) + '%<br />'
-                            htmlValue += 'Electoral Votes: ' + d.properties.electoralVotes
-                            div.html(htmlValue)
-                                .style("left", (d3.event.pageX) + "px")
-                                .style("top", (d3.event.pageY - 28) + "px");
-                       })
-                       .on("mouseout", function(d) {
-                           div.transition()
-                           .duration(500)
-                           .style("opacity", 0);
-                       });;
-                });
-            });            
-        </script>
-    </body>
+                        }
+                   })
+                   .on("mouseover", function(d) {
+                        div.transition()
+                        .duration(200)
+                        .style("opacity", .9);
+                        var htmlValue = ''
+                        htmlValue += d.properties.name + ' : <br />'
+                        htmlValue += 'GOP: ' + Math.round(100 * d.properties.republican) + '%<br />'
+                        htmlValue += 'DEM: ' + Math.round(100 * d.properties.democratic) + '%<br />'
+                        htmlValue += 'Electoral Votes: ' + d.properties.electoralVotes
+                        div.html(htmlValue)
+                            .style("left", (d3.event.pageX) + "px")
+                            .style("top", (d3.event.pageY - 28) + "px");
+                   })
+                   .on("mouseout", function(d) {
+                       div.transition()
+                       .duration(500)
+                       .style("opacity", 0);
+                   });
+            });
+        });            
+    }
+
+    drawMap(.7);
+    d3.select('#slider')
+        .attr("width", w)
+        .call(d3.slider()
+            .value(60)
+            .on("slide", function(evt, value) {
+                d3.select('#slidertext').text(Math.round(value));
+                // updateData(100.0/Math.round(value))
+            }));
+
+</script>
+</body>
 </html>
