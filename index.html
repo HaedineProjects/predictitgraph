@@ -185,11 +185,38 @@ Current threshhold: <span id="slidertext">60</span>
                        .duration(500)
                        .style("opacity", 0);
                    });
+
+                console.log(partyEV)
+                var legendText = ['GOP', 'DEM', 'Contested'];
+                var legend = d3.select("body").append("svg")
+                    .attr("class", "legend")
+                    .attr("width", 140)
+                    .attr("height", 200)
+                    .selectAll("g")
+                    .data(partyEV)
+                    .enter()
+                    .append("g");
+                    // .attr("transform", function(d, i) { return "translate(0," + i * 20 + ")"; });
+
+                    legend.append("rect")
+                          .attr("width", 18)
+                          .attr("height", 18)
+                          .style("fill", "#444");
+
+                    legend.append("text")
+                        .data(legendText)
+                        .attr("x", 24)
+                        .attr("y", 9)
+                        .attr("dy", ".35em")
+                        .text(function(d) {
+                            // console.log(d.GOP)
+                            return d;
+                        });
             });
-        });            
+        });
     }
 
-    drawMap(.7);
+    drawMap(.6);
     d3.select('#slider')
         .attr("width", w)
         .call(d3.slider()
