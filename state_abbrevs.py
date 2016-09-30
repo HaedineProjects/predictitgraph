@@ -1,4 +1,4 @@
-STATES = {
+state_abbrevs = {
 	'AL': 'Alabama',
 	'AK': 'Alaska',
 	'AZ': 'Arizona',
@@ -6,6 +6,7 @@ STATES = {
 	'CA': 'California',
 	'CO': 'Colorado',
 	'CT': 'Connecticut',
+	"DC": "District of Columbia",
 	'DE': 'Delaware',
 	'FL': 'Florida',
 	'GA': 'Georgia',

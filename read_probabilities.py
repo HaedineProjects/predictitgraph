@@ -11,3 +11,4 @@ for state in sorted(states):
 	# r = state['Republican']
 	print STATES[state] + ',' + unicode(1.0 - d)
 	
+	
